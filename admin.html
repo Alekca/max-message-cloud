@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Панель ведущего</title>
+<link rel="stylesheet" href="/screen.css">
+<style>
+main { max-width:900px; margin:auto; text-align:left; width:100%; }
+h1 { font-size:clamp(2rem,5vw,4rem); }
+input { padding:.55em; color:inherit; background:#171934; border:1px solid #a4a4c4; border-radius:.5em; font:inherit; max-width:100%; }
+form,.actions { display:flex; gap:8px; flex-wrap:wrap; }
+article { border:1px solid #ffffff42; padding:1em; border-radius:1em; margin:.6em 0; overflow-wrap:anywhere; }
+</style>
+<main>
+<h1>Панель ведущего</h1>
+<form id="login"><input id="key" type="password" aria-label="Ключ ведущего" placeholder="Ключ ведущего" required><button>Войти</button></form>
+<p id="notice" role="status"></p>
+<section id="panel" hidden>
+  <div class="actions"><a href="/?live=1" target="_blank" rel="noopener">Открыть экран ↗</a><button id="clear">Очистить экран</button></div>
+  <details><summary>Пробный режим без токена MAX</summary>
+    <form id="sample"><input id="sampleText" aria-label="Пробное сообщение" maxlength="180" placeholder="Пробное сообщение" required><button>В очередь</button></form>
+    <button id="reaction">Запустить ❤️</button>
+  </details>
+  <h2>На проверке</h2><div id="pending"></div>
+  <h2>Одобрено</h2><div id="visible"></div>
+</section>
+</main>
+<script>
+const get = (id) => document.getElementById(id);
+let key = '';
+let snapshot = '';
+let busy = false;
+
+async function api(body) {
+  const options = {headers: {Authorization: 'Bearer ' + key}, cache: 'no-store', signal: AbortSignal.timeout(5000)};
+  if (body) {
+    options.method = 'POST';
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(body);
+  }
+  const response = await fetch('/api/moderate', options);
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Ошибка сервера');
+  return data;
+}
+
+async function load() {
+  const data = await api();
+  const next = JSON.stringify(data.messages);
+  if (snapshot === next) return;
+  snapshot = next;
+  for (const status of ['pending', 'visible']) {
+    const list = get(status);
+    const rows = data.messages.filter((message) => message.status === status);
+    list.replaceChildren();
+    if (!rows.length) list.textContent = 'Пока пусто';
+    for (const row of rows) {
+      const item = document.createElement('article');
+      const text = document.createElement('p');
+      text.textContent = row.text;
+      item.append(text);
+      const actions = status === 'pending' ? [['Показать', 'show'], ['Отклонить', 'hide']] : [['Скрыть', 'hide']];
+      for (const [label, action] of actions) {
+        const button = document.createElement('button');
+        button.textContent = label;
+        button.onclick = () => run(() => api({action, id: row.id}));
+        item.append(button, ' ');
+      }
+      list.append(item);
+    }
+  }
+}
+
+async function run(task) {
+  if (busy || !key) return;
+  busy = true;
+  try {
+    if (task) await task();
+    await load();
+    if (task || get('panel').hidden) get('notice').textContent = '';
+    get('panel').hidden = false;
+  } catch (error) {
+    get('notice').textContent = error.message;
+  } finally {
+    busy = false;
+  }
+}
+
+get('login').onsubmit = (event) => {
+  event.preventDefault();
+  if (busy) return;
+  key = get('key').value;
+  get('key').value = '';
+  snapshot = '';
+  get('panel').hidden = true;
+  run();
+};
+get('clear').onclick = () => {
+  if (confirm('Скрыть все одобренные сообщения?')) run(() => api({action: 'clear'}));
+};
+get('sample').onsubmit = (event) => {
+  event.preventDefault();
+  run(async () => {
+    await api({action: 'sample', text: get('sampleText').value});
+    get('sampleText').value = '';
+  });
+};
+get('reaction').onclick = () => run(() => api({action: 'reaction', emoji: 'heart'}));
+setInterval(() => { if (!get('panel').hidden) run(); }, 1500);
+</script>
+</html>

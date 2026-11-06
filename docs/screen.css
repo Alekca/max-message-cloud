@@ -1,0 +1,25 @@
+:root { color-scheme: dark; font-family: system-ui,sans-serif; color:#f6f8ff; background:#111327; }
+* { box-sizing:border-box; }
+body { margin:0; min-height:100vh; display:flex; flex-direction:column; background:radial-gradient(ellipse at 25% 0%,#292657,transparent 58%),radial-gradient(ellipse at 100% 100%,#133f4a,transparent 52%); }
+header,footer { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:20px clamp(18px,5vw,64px); }
+header { border-bottom:1px solid #ffffff24; }
+.brand,.eyebrow { color:#a9ffe0; letter-spacing:.15em; font-size:.85rem; font-weight:750; }
+#status { color:#dbdbff; text-align:right; }
+main { flex:1; padding:clamp(24px,5vh,64px) 5vw; text-align:center; }
+h1 { font-size:clamp(2.4rem,6.4vw,7rem); line-height:1; margin:.15em 0 .22em; letter-spacing:-.055em; }
+h1 em { color:#b7a4ff; font-style:normal; }
+p { color:#d6d5ef; }
+#cloud { display:flex; flex-wrap:wrap; align-content:center; align-items:center; justify-content:center; gap:clamp(8px,1.4vw,22px); min-height:28vh; margin:24px auto 0; max-width:1450px; }
+.card { max-width:min(100%,29rem); padding:.65em 1em; border-radius:1em 1em 1em .3em; color:#16152c; background:#cfc3ff; font-size:clamp(1rem,2.1vw,2.1rem); font-weight:680; overflow-wrap:anywhere; animation:arrive .25s ease-out; }
+.card[data-color="1"] { background:#a6f4de; }
+.card[data-color="2"] { background:#ffcfaa; }
+.card[data-color="3"] { background:#ffc2df; }
+button,a { border:1px solid #ffffff42; padding:.55em .85em; border-radius:.7em; color:inherit; background:#ffffff12; cursor:pointer; font:inherit; text-decoration:none; }
+button:hover,a:hover { background:#ffffff30; }
+#controls { display:flex; flex-wrap:wrap; gap:.5em; }
+#reactions { position:fixed; inset:0; pointer-events:none; overflow:hidden; }
+.reaction { position:absolute; bottom:-1em; font-size:clamp(2.5rem,6vw,5rem); animation:float 2.5s ease-out both; }
+@keyframes float { 0% { opacity:0; transform:translateY(0) scale(.65); } 15% { opacity:1; } 100% { opacity:0; transform:translateY(-75vh) scale(1.2); } }
+@keyframes arrive { from { opacity:0; transform:translateY(8px); } }
+@media (prefers-reduced-motion:reduce) { .card { animation:none; } .reaction { bottom:10%; animation:flash 2s linear both; } }
+@keyframes flash { 80% { opacity:1; } 100% { opacity:0; } }
