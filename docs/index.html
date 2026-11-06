@@ -2,16 +2,25 @@
 <html lang="ru">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Голос зала — облако сообщений</title>
+<title>Голос зала — чат мероприятия</title>
 <link rel="stylesheet" href="screen.css">
 <header><div class="brand">◉ &nbsp; ГОЛОС ЗАЛА</div><div id="status" role="status">Подключение…</div></header>
-<main>
+<main class="stage">
+  <aside id="join">
+    <div class="eyebrow">ПРИСОЕДИНЯЙТЕСЬ</div>
+    <img id="qr" src="bot-qr.png" alt="QR-код бота MAX" hidden>
+    <p>Откройте бота в MAX, нажмите «Начать» и отправьте сообщение.</p>
+    <a id="bot" hidden>Открыть бота ↗</a>
+  </aside>
+  <section class="chat">
   <div class="eyebrow">СООБЩЕНИЯ УЧАСТНИКОВ</div>
-  <h1>Облако <em>сообщений</em></h1>
+  <h1>Чат <em>мероприятия</em></h1>
   <p id="hint">Напишите боту в MAX, чтобы ваше сообщение увидел зал.</p>
-  <section id="cloud" aria-label="Сообщения"></section>
+  <section id="cloud" aria-label="Сообщения" tabindex="0"></section>
+  </section>
 </main>
-<footer><div id="controls"><a id="bot" hidden>Открыть бота в MAX ↗</a></div><button id="full">На весь экран ⛶</button></footer>
+<footer><div id="controls"><button id="latest">К новым ↓</button><a id="hostLink" href="?live=1&amp;host=1" hidden>Режим ведущего</a></div><button id="full">На весь экран ⛶</button></footer>
+<form id="hostLogin" hidden><label>Ключ ведущего <input id="hostKey" type="password" required></label><button>Подключить управление</button><span id="hostStatus" role="status"></span></form>
 <div id="reactions" aria-hidden="true"></div>
 <script src="screen.js"></script>
 </html>

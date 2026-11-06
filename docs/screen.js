@@ -6,7 +6,87 @@ const bot = byId('bot');
 const params = new URLSearchParams(location.search);
 const server = params.get('server');
 const local = ['localhost', '127.0.0.1'].includes(location.hostname);
-const demo = !server && !local && params.get('live') !== '1';
+const host = params.get('host') === '1';
+const demo = !server && !local && params.get('live') !== '1' && !host && location.hostname !== 'golos.it9tech.ru';
+const botUrl = 'https://max.ru/se14925046_bot';
+let hostKey = '';
+let pendingPosition;
+let sendingPosition = false;
+let scrollTimer;
+let appliedScroll = -1;
+const bottom = {message_id: null, fraction: 0};
+
+function readPosition() {
+  if (cloud.scrollHeight - cloud.clientHeight - cloud.scrollTop < 8) return bottom;
+  const top = cloud.getBoundingClientRect().top;
+  const card = Array.from(cloud.children).find((element) => element.getBoundingClientRect().bottom > top);
+  if (!card) return bottom;
+  const bounds = card.getBoundingClientRect();
+  return {message_id: Number(card.dataset.id), fraction: Math.max(0, (top - bounds.top) / bounds.height)};
+}
+
+function applyPosition(position) {
+  const card = position && cards.get(position.message_id);
+  if (card) {
+    const bounds = card.getBoundingClientRect();
+    cloud.scrollTop += bounds.top - cloud.getBoundingClientRect().top + bounds.height * position.fraction;
+  } else {
+    cloud.scrollTop = cloud.scrollHeight;
+  }
+  appliedScroll = cloud.scrollTop;
+}
+
+async function sendPosition(position) {
+  pendingPosition = position;
+  if (sendingPosition || !hostKey) return;
+  sendingPosition = true;
+  try {
+    while (pendingPosition) {
+      const next = pendingPosition;
+      pendingPosition = undefined;
+      const response = await fetch('/api/position', {
+        method: 'POST',
+        headers: {Authorization: 'Bearer ' + hostKey, 'Content-Type': 'application/json'},
+        body: JSON.stringify(next),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!response.ok) throw new Error(response.status === 401 ? 'Проверьте ключ ведущего' : 'Не удалось передать позицию');
+      byId('hostStatus').textContent = 'Экран следует за вашей прокруткой';
+    }
+  } catch (error) {
+    byId('hostStatus').textContent = error.message;
+  } finally {
+    sendingPosition = false;
+  }
+}
+
+byId('latest').onclick = () => {
+  applyPosition(bottom);
+  sendPosition(bottom);
+};
+if (host) {
+  byId('hostLogin').hidden = false;
+  document.body.classList.add('host');
+  byId('hostLogin').onsubmit = (event) => {
+    event.preventDefault();
+    hostKey = byId('hostKey').value;
+    byId('hostKey').value = '';
+    sendPosition(readPosition());
+  };
+  cloud.addEventListener('scroll', () => {
+    if (Math.abs(cloud.scrollTop - appliedScroll) < 1) return;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => sendPosition(readPosition()), 120);
+  });
+} else if (!demo && !server) {
+  byId('hostLink').hidden = false;
+}
+
+function showBot() {
+  bot.href = botUrl;
+  bot.hidden = false;
+  byId('qr').hidden = false;
+}
 const cards = new Map();
 let lastReaction = null;
 
@@ -24,6 +104,7 @@ function render(messages) {
       card = document.createElement('article');
       card.className = 'card';
       card.dataset.color = id % 4;
+      card.dataset.id = id;
       cards.set(id, card);
     }
     if (card.textContent !== text) card.textContent = text;
@@ -45,17 +126,16 @@ async function refresh(endpoint) {
     const response = await fetch(endpoint, {cache: 'no-store', signal: AbortSignal.timeout(5000)});
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
+    const position = host ? readPosition() : data.position;
     render(data.messages);
+    applyPosition(position);
     for (const reaction of data.reactions) {
       if (lastReaction !== null && reaction.id > lastReaction) animate(reaction.emoji);
     }
     lastReaction = Math.max(lastReaction || 0, ...data.reactions.map(({id}) => id));
-    status.textContent = '● Прямой эфир';
-    hint.textContent = data.messages.length ? 'Напишите боту в MAX, чтобы ваше сообщение увидел зал.' : 'Ждём первые сообщения от участников.';
-    if (typeof data.botUrl === 'string' && /^https:\/\/max\.ru\//.test(data.botUrl)) {
-      bot.href = data.botUrl;
-      bot.hidden = false;
-    }
+    status.textContent = data.maxConnected ? '● Прямой эфир' : '● Тестовый режим';
+    hint.textContent = data.messages.length ? 'Сообщения участников' : 'Ждём первые сообщения от участников.';
+    if (data.maxConnected && data.botUrl === botUrl) showBot();
   } catch {
     status.textContent = '○ Нет связи · переподключаемся';
   }
@@ -76,12 +156,14 @@ document.addEventListener('fullscreenchange', () => {
 
 if (demo) {
   status.textContent = '● Демо';
+  showBot();
   hint.textContent = 'Пример экрана для мероприятия. Попробуйте реакции внизу.';
   const examples = [
     'Привет из зала!', 'Было очень интересно!', 'Спасибо за встречу ✨',
     'Ждём следующую!', 'Отличная идея!', 'Аплодируем всей командой 👏',
   ];
   render(examples.map((text, index) => ({id: index + 1, text})));
+  applyPosition(bottom);
   for (const emoji of ['❤️', '🔥', '👏', '👍']) {
     const button = document.createElement('button');
     button.textContent = emoji;
