@@ -156,7 +156,7 @@ async function refresh(endpoint) {
     }
     lastReaction = Math.max(lastReaction || 0, ...data.reactions.map(({id}) => id));
     status.textContent = data.maxConnected ? '● Прямой эфир' : '● Тестовый режим';
-    hint.textContent = data.messages.length ? 'Сообщения появляются после проверки ведущим' : 'Ждём сообщения от участников';
+    hint.textContent = data.messages.length ? 'Сообщения из чата MAX' : 'Ждём сообщения от участников';
     if (data.maxConnected && data.botUrl === botUrl) showBot();
   } catch {
     status.textContent = '○ Нет связи · переподключаемся';

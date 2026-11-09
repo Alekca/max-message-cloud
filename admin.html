@@ -18,11 +18,11 @@ article { border:1px solid #ffffff42; padding:1em; border-radius:1em; margin:.6e
 <section id="panel" hidden>
   <div class="actions"><a href="/?live=1" target="_blank" rel="noopener">Открыть экран ↗</a><a href="/?live=1&amp;host=1" target="_blank" rel="noopener">Управление экраном ↗</a><button id="clear">Очистить экран</button></div>
   <details><summary>Пробный режим без токена MAX</summary>
-    <form id="sample"><input id="sampleText" aria-label="Пробное сообщение" maxlength="180" placeholder="Пробное сообщение" required><button>В очередь</button></form>
+    <form id="sample"><input id="sampleText" aria-label="Пробное сообщение" maxlength="180" placeholder="Пробное сообщение" required><button>Показать на экране</button></form>
     <button id="reaction">Запустить ❤️</button>
   </details>
-  <h2>На проверке</h2><div id="pending"></div>
-  <h2>Одобрено</h2><div id="visible"></div>
+  <h2>Старая очередь</h2><div id="pending"></div>
+  <h2>На экране</h2><div id="visible"></div>
 </section>
 </main>
 <script>
@@ -98,7 +98,7 @@ get('login').onsubmit = (event) => {
   run();
 };
 get('clear').onclick = () => {
-  if (confirm('Скрыть все одобренные сообщения?')) run(() => api({action: 'clear'}));
+  if (confirm('Скрыть все сообщения с экрана?')) run(() => api({action: 'clear'}));
 };
 get('sample').onsubmit = (event) => {
   event.preventDefault();
