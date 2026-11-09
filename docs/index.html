@@ -1,26 +1,43 @@
 <!doctype html>
 <html lang="ru">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Голос зала — чат мероприятия</title>
-<link rel="stylesheet" href="screen.css">
-<header><div class="brand">◉ &nbsp; ГОЛОС ЗАЛА</div><div id="status" role="status">Подключение…</div></header>
-<main class="stage">
-  <aside id="join">
-    <div class="eyebrow">ПРИСОЕДИНЯЙТЕСЬ</div>
-    <img id="qr" src="bot-qr.png" alt="QR-код бота MAX" hidden>
-    <p>Откройте бота в MAX, нажмите «Начать» и отправьте сообщение.</p>
-    <a id="bot" hidden>Открыть бота ↗</a>
-  </aside>
-  <section class="chat">
-  <div class="eyebrow">СООБЩЕНИЯ УЧАСТНИКОВ</div>
-  <h1>Чат <em>мероприятия</em></h1>
-  <p id="hint">Напишите боту в MAX, чтобы ваше сообщение увидел зал.</p>
-  <section id="cloud" aria-label="Сообщения" tabindex="0"></section>
-  </section>
-</main>
-<footer><div id="controls"><button id="latest">К новым ↓</button><a id="hostLink" href="?live=1&amp;host=1" hidden>Режим ведущего</a></div><button id="full">На весь экран ⛶</button></footer>
-<form id="hostLogin" hidden><label>Ключ ведущего <input id="hostKey" type="password" required></label><button>Подключить управление</button><span id="hostStatus" role="status"></span></form>
-<div id="reactions" aria-hidden="true"></div>
-<script src="screen.js"></script>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Голос зала — чат мероприятия</title>
+  <link rel="stylesheet" href="screen.css">
+</head>
+<body class="stage-view">
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">···</span> Голос зала</div>
+    <div id="status" role="status">Подключение…</div>
+  </header>
+  <main class="stage">
+    <aside id="join" aria-labelledby="join-title">
+      <div class="eyebrow"><span aria-hidden="true"></span> Чат мероприятия</div>
+      <h1 id="join-title">Напишите<br> в чат зала</h1>
+      <div class="join-card">
+        <img id="qr" src="bot-qr.png" alt="QR-код бота «Голос зала» в MAX" width="360" height="360" hidden>
+        <div>
+          <p>Откройте бота в MAX, нажмите «Начать» и отправьте сообщение.</p>
+          <a id="bot" hidden>Открыть бота ↗</a>
+        </div>
+      </div>
+    </aside>
+    <section class="chat" aria-labelledby="chat-title">
+      <div class="chat-header">
+        <span class="avatar" aria-hidden="true">ГЗ</span>
+        <div><h2 id="chat-title">Голос зала</h2><span>Сообщения участников</span></div>
+      </div>
+      <section id="cloud" aria-label="Сообщения" tabindex="0"></section>
+      <p id="hint">Ждём первые сообщения от участников.</p>
+    </section>
+  </main>
+  <footer>
+    <div id="controls"><button id="latest">К новым ↓</button><a id="hostLink" href="?live=1&amp;host=1" hidden>Режим ведущего</a></div>
+    <button id="full">На весь экран ⛶</button>
+  </footer>
+  <form id="hostLogin" hidden><label>Ключ ведущего <input id="hostKey" type="password" required></label><button>Подключить управление</button><span id="hostStatus" role="status"></span></form>
+  <div id="reactions" aria-hidden="true"></div>
+  <script src="screen.js"></script>
+</body>
 </html>

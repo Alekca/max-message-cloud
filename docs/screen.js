@@ -103,7 +103,6 @@ function render(messages) {
     if (!card) {
       card = document.createElement('article');
       card.className = 'card';
-      card.dataset.color = id % 4;
       card.dataset.id = id;
       cards.set(id, card);
     }
@@ -134,7 +133,7 @@ async function refresh(endpoint) {
     }
     lastReaction = Math.max(lastReaction || 0, ...data.reactions.map(({id}) => id));
     status.textContent = data.maxConnected ? '● Прямой эфир' : '● Тестовый режим';
-    hint.textContent = data.messages.length ? 'Сообщения участников' : 'Ждём первые сообщения от участников.';
+    hint.textContent = data.messages.length ? 'Сообщения появляются после проверки ведущим' : 'Ждём сообщения от участников';
     if (data.maxConnected && data.botUrl === botUrl) showBot();
   } catch {
     status.textContent = '○ Нет связи · переподключаемся';
