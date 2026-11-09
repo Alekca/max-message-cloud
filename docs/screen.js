@@ -14,26 +14,58 @@ let pendingPosition;
 let sendingPosition = false;
 let scrollTimer;
 let appliedScroll = -1;
+let projectedPosition;
+let animationFrame = 0;
+let scrollTarget;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const bottom = {message_id: null, fraction: 0};
 
 function readPosition() {
   if (cloud.scrollHeight - cloud.clientHeight - cloud.scrollTop < 8) return bottom;
-  const top = cloud.getBoundingClientRect().top;
-  const card = Array.from(cloud.children).find((element) => element.getBoundingClientRect().bottom > top);
+  const top = cloud.scrollTop;
+  const card = Array.from(cloud.children).find((element) => element.offsetTop + element.offsetHeight > top);
   if (!card) return bottom;
-  const bounds = card.getBoundingClientRect();
-  return {message_id: Number(card.dataset.id), fraction: Math.max(0, (top - bounds.top) / bounds.height)};
+  return {message_id: Number(card.dataset.id), fraction: Math.max(0, (top - card.offsetTop) / card.offsetHeight)};
 }
 
-function applyPosition(position) {
+function positionOffset(position) {
   const card = position && cards.get(position.message_id);
-  if (card) {
-    const bounds = card.getBoundingClientRect();
-    cloud.scrollTop += bounds.top - cloud.getBoundingClientRect().top + bounds.height * position.fraction;
-  } else {
-    cloud.scrollTop = cloud.scrollHeight;
+  const max = Math.max(0, cloud.scrollHeight - cloud.clientHeight);
+  return card ? Math.min(max, card.offsetTop + card.offsetHeight * position.fraction) : max;
+}
+
+function applyPosition(position, smooth = false) {
+  const target = positionOffset(position);
+  if (smooth && !reducedMotion.matches && target === scrollTarget && animationFrame) return;
+  cancelAnimationFrame(animationFrame);
+  animationFrame = 0;
+  scrollTarget = target;
+  const start = cloud.scrollTop;
+  if (!smooth || reducedMotion.matches || Math.abs(target - start) < 1) {
+    cloud.scrollTop = target;
+    appliedScroll = cloud.scrollTop;
+    return;
   }
-  appliedScroll = cloud.scrollTop;
+  const startedAt = performance.now();
+  function step(now) {
+    const progress = Math.min(1, (now - startedAt) / 160);
+    cloud.scrollTop = start + (target - start) * progress;
+    animationFrame = progress < 1 ? requestAnimationFrame(step) : 0;
+  }
+  animationFrame = requestAnimationFrame(step);
+}
+
+async function followPosition(endpoint) {
+  let delay = 110;
+  try {
+    const response = await fetch(endpoint, {cache: 'no-store', signal: AbortSignal.timeout(2500)});
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    projectedPosition = await response.json();
+    applyPosition(projectedPosition, true);
+  } catch {
+    delay = 800;
+  }
+  setTimeout(() => followPosition(endpoint), delay);
 }
 
 async function sendPosition(position) {
@@ -75,8 +107,11 @@ if (host) {
   };
   cloud.addEventListener('scroll', () => {
     if (Math.abs(cloud.scrollTop - appliedScroll) < 1) return;
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => sendPosition(readPosition()), 120);
+    if (scrollTimer) return;
+    scrollTimer = setTimeout(() => {
+      scrollTimer = undefined;
+      if (Math.abs(cloud.scrollTop - appliedScroll) >= 1) sendPosition(readPosition());
+    }, 65);
   });
 } else if (!demo && !server) {
   byId('hostLink').hidden = false;
@@ -91,11 +126,13 @@ const cards = new Map();
 let lastReaction = null;
 
 function render(messages) {
+  let changed = false;
   const active = new Set(messages.map(({id}) => id));
   for (const [id, element] of cards) {
     if (!active.has(id)) {
       element.remove();
       cards.delete(id);
+      changed = true;
     }
   }
   messages.forEach(({id, text, author, avatar}, index) => {
@@ -130,8 +167,12 @@ function render(messages) {
       card.append(face, bubble);
       cards.set(id, card);
     }
-    if (cloud.children[index] !== card) cloud.insertBefore(card, cloud.children[index] || null);
+    if (cloud.children[index] !== card) {
+      cloud.insertBefore(card, cloud.children[index] || null);
+      changed = true;
+    }
   });
+  return changed;
 }
 
 function animate(emoji) {
@@ -148,9 +189,8 @@ async function refresh(endpoint) {
     const response = await fetch(endpoint, {cache: 'no-store', signal: AbortSignal.timeout(5000)});
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
-    const position = host ? readPosition() : data.position;
-    render(data.messages);
-    applyPosition(position);
+    const position = host ? readPosition() : projectedPosition === undefined ? data.position : projectedPosition;
+    if (render(data.messages)) applyPosition(position, !host);
     for (const reaction of data.reactions) {
       if (lastReaction !== null && reaction.id > lastReaction) animate(reaction.emoji);
     }
@@ -205,6 +245,7 @@ if (demo) {
     const endpoint = new URL('/api/screen', server || location.origin);
     if (endpoint.protocol !== 'https:' && !local) throw new Error('HTTPS required');
     refresh(endpoint);
+    if (!host) followPosition(new URL('/api/position', endpoint));
   } catch {
     status.textContent = 'Проверьте HTTPS-адрес сервера';
   }

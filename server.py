@@ -146,7 +146,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(payload)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
-        if self.path == "/api/screen" and self.headers.get("Origin") == ORIGIN:
+        if self.path in ("/api/screen", "/api/position") and self.headers.get("Origin") == ORIGIN:
             self.send_header("Access-Control-Allow-Origin", ORIGIN)
             self.send_header("Vary", "Origin")
         self.end_headers()
@@ -169,6 +169,10 @@ class Handler(BaseHTTPRequestHandler):
             name, mime = files[self.path]
             directory = ROOT if self.path == "/admin" else ROOT / "docs"
             return self.respond(200, (directory / name).read_bytes(), mime if mime.startswith("image/") else mime + "; charset=utf-8")
+        if self.path == "/api/position":
+            with database() as db:
+                position = db.execute("SELECT message_id, fraction FROM screen_position WHERE id=1").fetchone()
+            return self.respond(200, dict(position) if position else None)
         if self.path == "/api/screen":
             with database() as db:
                 messages = db.execute(
