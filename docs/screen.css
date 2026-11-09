@@ -93,7 +93,7 @@ button:hover, a:hover { background: #ffffff30; }
 }
 #qr {
   display: block;
-  width: min(44%, 230px);
+  width: min(54%, 310px);
   height: auto;
   border-radius: .65rem;
   background: #fff;
@@ -215,7 +215,7 @@ button:hover, a:hover { background: #ffffff30; }
   .stage { grid-template-columns: 1fr; gap: 22px; padding-block: 22px; }
   #join h1 { font-size: clamp(2.2rem, 8vw, 3.1rem); }
   #join h1 br { display: none; }
-  #qr { width: min(34%, 130px); }
+  #qr { width: min(42%, 160px); }
   .chat-header { padding: 12px; }
   footer { align-items: flex-start; }
 }
