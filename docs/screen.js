@@ -98,15 +98,38 @@ function render(messages) {
       cards.delete(id);
     }
   }
-  messages.forEach(({id, text}, index) => {
+  messages.forEach(({id, text, author, avatar}, index) => {
     let card = cards.get(id);
     if (!card) {
       card = document.createElement('article');
       card.className = 'card';
       card.dataset.id = id;
+      const name = author || 'Участник';
+      const face = document.createElement('span');
+      face.className = 'message-avatar';
+      face.setAttribute('aria-hidden', 'true');
+      const initials = name.replace(/^@/, '').split(/\s+/).slice(0, 2).map(word => [...word][0]).join('').toUpperCase();
+      face.textContent = initials || 'У';
+      if (avatar) {
+        const photo = document.createElement('img');
+        photo.alt = '';
+        photo.referrerPolicy = 'no-referrer';
+        photo.addEventListener('error', () => photo.remove(), {once: true});
+        photo.src = avatar;
+        face.append(photo);
+      }
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      const signature = document.createElement('div');
+      signature.className = 'message-author';
+      signature.textContent = name;
+      const content = document.createElement('div');
+      content.className = 'message-text';
+      content.textContent = text;
+      bubble.append(signature, content);
+      card.append(face, bubble);
       cards.set(id, card);
     }
-    if (card.textContent !== text) card.textContent = text;
     if (cloud.children[index] !== card) cloud.insertBefore(card, cloud.children[index] || null);
   });
 }
@@ -161,13 +184,20 @@ if (demo) {
     'Привет из зала!', 'Было очень интересно!', 'Спасибо за встречу ✨',
     'Ждём следующую!', 'Отличная идея!', 'Аплодируем всей командой 👏',
   ];
-  render(examples.map((text, index) => ({id: index + 1, text})));
+  const authors = ["Анна", "@misha", "Ольга", "@natalia", "Андрей", "Елена"];
+  render(examples.map((text, index) => ({id: index + 1, text, author: authors[index]})));
   applyPosition(bottom);
+  let lastDemoReaction = 0;
   for (const emoji of ['❤️', '🔥', '👏', '👍']) {
     const button = document.createElement('button');
     button.textContent = emoji;
     button.setAttribute('aria-label', 'Запустить реакцию ' + emoji);
-    button.onclick = () => animate(emoji);
+    button.onclick = () => {
+      const now = performance.now();
+      if (lastDemoReaction && now - lastDemoReaction < 1000) return;
+      lastDemoReaction = now;
+      animate(emoji);
+    };
     byId('controls').append(button);
   }
 } else {

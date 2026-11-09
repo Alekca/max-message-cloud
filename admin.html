@@ -58,7 +58,9 @@ async function load() {
       const item = document.createElement('article');
       const text = document.createElement('p');
       text.textContent = row.text;
-      item.append(text);
+      const author = document.createElement("strong");
+      author.textContent = row.author || "Участник";
+      item.append(author, text);
       const actions = status === 'pending' ? [['Показать', 'show'], ['Отклонить', 'hide']] : [['Скрыть', 'hide']];
       for (const [label, action] of actions) {
         const button = document.createElement('button');

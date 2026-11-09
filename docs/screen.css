@@ -153,20 +153,46 @@ button:hover, a:hover { background: #ffffff30; }
   font-size: .85rem;
 }
 .card {
-  width: fit-content;
-  max-width: 93%;
+  display: flex;
+  align-items: flex-end;
+  gap: .5em;
   margin: 0 0 .6em;
-  padding: .62em .82em;
+  font-size: clamp(1.05rem, 1.82vw, 2rem);
+  line-height: 1.35;
+  animation: arrive .25s ease-out;
+}
+.message-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 2.4em;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 50%;
+  color: #fff;
+  background: #5a49a8;
+  font-size: .8em;
+  font-weight: 750;
+}
+.message-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.message-bubble {
+  min-width: 0;
+  max-width: 88%;
+  padding: .52em .78em;
   border-radius: .85em .85em .85em .18em;
   color: #fbfaff;
   background: #383751;
-  font-size: clamp(1.05rem, 1.82vw, 2rem);
-  line-height: 1.35;
   overflow-wrap: anywhere;
-  white-space: pre-wrap;
-  animation: arrive .25s ease-out;
 }
-.card:nth-child(even) { background: #423e60; }
+.card:nth-child(even) .message-bubble { background: #423e60; }
+.message-author { color: #d4c8ff; font-size: .76em; font-weight: 750; margin-bottom: .22em; }
+.message-text { white-space: pre-wrap; }
 .stage-view button, .stage-view a { border-color: #6257a642; background: #ffffff99; }
 .stage-view button:hover, .stage-view a:hover { background: #e5defd; }
 #controls { display: flex; flex-wrap: wrap; gap: .5em; }
