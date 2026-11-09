@@ -229,8 +229,8 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    if len(ADMIN) < 16:
-        sys.exit("ADMIN_KEY must be at least 16 characters")
+    if len(ADMIN) < 8:
+        sys.exit("ADMIN_KEY must be at least 8 characters")
     if TOKEN and not re.fullmatch(r"[a-zA-Z0-9_-]{20,64}", SECRET or ""):
         sys.exit("Set MAX_WEBHOOK_SECRET (20–64 letters, digits, underscores or hyphens)")
     if SECRET and not TOKEN:
