@@ -61,8 +61,8 @@ def welcome(user_id, text):
 
 def submit(db, key, text, author=None, avatar=None):
     return db.execute(
-        "INSERT OR IGNORE INTO messages(key,text,status,shown,author,avatar) VALUES (?,?,'visible',?,?,?)",
-        (key, text, time.time(), author, avatar),
+        "INSERT OR IGNORE INTO messages(key,text,status,author,avatar) VALUES (?,?,'pending',?,?)",
+        (key, text, author, avatar),
     ).rowcount
 
 
@@ -104,7 +104,7 @@ def handle_update(update):
     if kind == "bot_started":
         user_id = (update.get("user") or {}).get("user_id")
         if user_id:
-            welcome(user_id, "Напишите сообщение до 180 символов. Оно сразу появится на общем экране с вашим именем и фото профиля, если они доступны. Можно отправлять одну реакцию в секунду.")
+            welcome(user_id, "Напишите сообщение до 180 символов. После одобрения ведущим оно появится на общем экране с вашим именем и фото профиля, если они доступны. Можно отправлять одну реакцию в секунду.")
     elif kind == "message_created" and dialog:
         sender = message.get("sender") or {}
         body = message.get("body") or {}
@@ -120,7 +120,7 @@ def handle_update(update):
         with database() as db:
             inserted = submit(db, key, text, author, avatar)
         if inserted:
-            welcome(user_id, "Сообщение уже на экране.")
+            welcome(user_id, "Сообщение отправлено на проверку ведущему.")
     elif kind == "message_callback" and dialog:
         callback = update.get("callback") or {}
         emoji = EMOJI.get(callback.get("payload"))
