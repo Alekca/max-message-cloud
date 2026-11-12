@@ -162,6 +162,7 @@ class Handler(BaseHTTPRequestHandler):
             "/screen.css": ("screen.css", "text/css"),
             "/screen.js": ("screen.js", "text/javascript"),
             "/bot-qr.png": ("bot-qr.png", "image/png"),
+            "/event-background.png": ("event-background.png", "image/png"),
         }
         if urlsplit(self.path).path == "/":
             self.path = "/"
