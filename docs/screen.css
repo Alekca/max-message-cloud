@@ -77,7 +77,8 @@ footer {
   text-transform: uppercase;
 }
 .eyebrow span { width: 2.6em; height: .32em; border-radius: 999px; background: #006aff; }
-#join h1 { margin: .22em 0 .36em; text-shadow: 0 2px 18px #ffffffb3; }
+#join h1 { margin: .3em 0 .7em; line-height: 1.15; text-shadow: 0 2px 18px #ffffffb3; }
+#join h1 br { display: none; }
 .join-card {
   display: flex;
   align-items: center;
@@ -201,7 +202,7 @@ footer {
 @keyframes flash { 80% { opacity: 1; } 100% { opacity: 0; } }
 @media (max-width: 700px) {
   .stage { grid-template-columns: 1fr; gap: 22px; padding-block: 22px; }
-  #join h1 { font-size: clamp(2.2rem, 8vw, 3.1rem); }
+  #join h1 { font-size: clamp(1.5rem, 5.5vw, 2rem); }
   #join h1 br { display: none; }
   #qr { width: min(42%, 160px); }
   .chat-header { padding: 12px; }
@@ -223,21 +224,23 @@ footer {
 #displayModes button { border: 0; background: transparent; font-size: .9rem; }
 #displayModes button[aria-pressed="true"] { background: #1562aa; color: #fff; }
 @media (min-width: 701px) {
+  #join { align-self: start; margin-top: min(3vh, 24px); }
+  #join .eyebrow { font-size: clamp(.7rem, 1vw, .95rem); }
   .stage-view[data-display="chat"] .stage {
     grid-template-columns: minmax(0, .7fr) minmax(0, 1.65fr);
     gap: clamp(24px, 4vw, 64px);
     width: min(100%, 1840px);
     padding-block: 2vh;
   }
-  .stage-view[data-display="chat"] #join h1 { font-size: clamp(2.2rem, 3.4vw, 4rem); }
+  .stage-view[data-display="chat"] #join h1 { font-size: clamp(1.5rem, 2.15vw, 2.4rem); }
   .stage-view[data-display="chat"] .join-card { flex-direction: column; align-items: flex-start; }
-  .stage-view[data-display="chat"] #qr { width: min(100%, 230px); align-self: center; }
+  .stage-view[data-display="chat"] #qr { width: min(100%, 290px, 42vh); align-self: center; }
   .stage-view[data-display="chat"] .join-card p { font-size: clamp(1rem, 1.3vw, 1.25rem); }
   .stage-view[data-display="chat"] #cloud { height: clamp(230px, 60vh, 960px); }
   .stage-view[data-display="chat"] .card { font-size: clamp(1.15rem, 1.9vw, 2.2rem); }
-  .stage-view[data-display="qr"] #join h1 { font-size: clamp(2.2rem, 3.4vw, 4rem); }
+  .stage-view[data-display="qr"] #join h1 { font-size: clamp(1.5rem, 2.15vw, 2.4rem); }
   .stage-view[data-display="qr"] .join-card { flex-direction: column; text-align: center; }
-  .stage-view[data-display="qr"] #qr { width: min(100%, 350px, 37vh); }
+  .stage-view[data-display="qr"] #qr { width: min(100%, 420px, 47vh); }
   .stage-view[data-display="qr"] .join-card p { font-size: clamp(1rem, 1.3vw, 1.25rem); }
 }
 @media (max-width: 700px) {
