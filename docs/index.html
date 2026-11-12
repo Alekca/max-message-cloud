@@ -7,14 +7,6 @@
   <link rel="stylesheet" href="screen.css">
 </head>
 <body class="stage-view" data-display="chat">
-  <header class="topbar">
-    <div class="brand"><span class="brand-mark" aria-hidden="true">···</span> Голос зала</div>
-    <div id="displayModes" role="group" aria-label="Режим отображения">
-      <button type="button" data-display-mode="chat" aria-pressed="true">Крупный чат</button>
-      <button type="button" data-display-mode="qr" aria-pressed="false">Крупный QR</button>
-    </div>
-    <div id="status" role="status">Подключение…</div>
-  </header>
   <main class="stage">
     <aside id="join" aria-labelledby="join-title">
       <div class="eyebrow"><span aria-hidden="true"></span> Чат мероприятия</div>
@@ -37,10 +29,14 @@
     </section>
   </main>
   <footer>
-    <div id="controls"><button id="latest">К новым ↓</button><a id="hostLink" href="?live=1&amp;host=1" hidden>Режим ведущего</a></div>
+    <div id="controls"><button id="latest">К новым ↓</button></div>
+    <div id="displayModes" role="group" aria-label="Режим отображения">
+      <button type="button" data-display-mode="chat" aria-pressed="true">Крупный чат</button>
+      <button type="button" data-display-mode="qr" aria-pressed="false">Крупный QR</button>
+    </div>
+    <div id="status" role="status">Подключение…</div>
     <button id="full">На весь экран ⛶</button>
   </footer>
-  <form id="hostLogin" hidden><label>Ключ ведущего <input id="hostKey" type="password" required></label><button>Подключить управление</button><span id="hostStatus" role="status"></span></form>
   <div id="reactions" aria-hidden="true"></div>
   <script src="screen.js"></script>
 </body>

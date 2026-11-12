@@ -146,7 +146,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(payload)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
-        if self.path in ("/api/screen", "/api/position") and self.headers.get("Origin") == ORIGIN:
+        if self.path == "/api/screen" and self.headers.get("Origin") == ORIGIN:
             self.send_header("Access-Control-Allow-Origin", ORIGIN)
             self.send_header("Vary", "Origin")
         self.end_headers()
@@ -170,16 +170,11 @@ class Handler(BaseHTTPRequestHandler):
             name, mime = files[self.path]
             directory = ROOT if self.path == "/admin" else ROOT / "docs"
             return self.respond(200, (directory / name).read_bytes(), mime if mime.startswith("image/") else mime + "; charset=utf-8")
-        if self.path == "/api/position":
-            with database() as db:
-                position = db.execute("SELECT message_id, fraction FROM screen_position WHERE id=1").fetchone()
-            return self.respond(200, dict(position) if position else None)
         if self.path == "/api/screen":
             with database() as db:
                 messages = db.execute(
                     "SELECT id,text,author,avatar FROM messages WHERE status='visible' ORDER BY shown,id"
                 ).fetchall()
-                position = db.execute("SELECT message_id, fraction FROM screen_position WHERE id=1").fetchone()
                 reactions = db.execute(
                     "SELECT id,emoji FROM reactions WHERE accepted=1 AND created>? ORDER BY id DESC LIMIT 30",
                     (time.time() - 4,),
@@ -189,7 +184,6 @@ class Handler(BaseHTTPRequestHandler):
                 "reactions": [dict(row) for row in reversed(reactions)],
                 "botUrl": BOT_URL,
                 "maxConnected": bool(TOKEN),
-                "position": dict(position) if position else None,
             })
         if self.path == "/api/moderate":
             if not self.authorized():
@@ -205,7 +199,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/max/webhook":
             if not matches(self.headers.get("X-Max-Bot-Api-Secret", ""), SECRET):
                 return self.respond(403, {})
-        elif self.path in ("/api/moderate", "/api/position"):
+        elif self.path == "/api/moderate":
             if not self.authorized():
                 return self.respond(401, {"error": "Неверный ключ"})
         else:
@@ -225,18 +219,6 @@ class Handler(BaseHTTPRequestHandler):
             except OSError as error:
                 # The message or reaction is already stored before outbound acknowledgement.
                 print(f"MAX request failed: {type(error).__name__}", file=sys.stderr)
-            return self.respond(200, {})
-        if self.path == "/api/position":
-            message_id = body.get("message_id")
-            fraction = body.get("fraction")
-            if (message_id is not None and (type(message_id) is not int or not 0 < message_id < 2**63)
-                    or type(fraction) not in (int, float) or not 0 <= fraction <= 1):
-                return self.respond(400, {"error": "Некорректная позиция"})
-            with database() as db:
-                db.execute(
-                    "INSERT OR REPLACE INTO screen_position VALUES (1,?,?)",
-                    (message_id, fraction),
-                )
             return self.respond(200, {})
         action = body.get("action")
         with database() as db:
@@ -285,9 +267,6 @@ if __name__ == "__main__":
             );
             CREATE TABLE IF NOT EXISTS reactions (
                 id INTEGER PRIMARY KEY, key TEXT UNIQUE, emoji TEXT NOT NULL, created REAL NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS screen_position (
-                id INTEGER PRIMARY KEY, message_id INTEGER, fraction REAL NOT NULL
             );
             CREATE INDEX IF NOT EXISTS reactions_created ON reactions(created);
         """)

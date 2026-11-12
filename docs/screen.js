@@ -6,18 +6,8 @@ const bot = byId('bot');
 const params = new URLSearchParams(location.search);
 const server = params.get('server');
 const local = ['localhost', '127.0.0.1'].includes(location.hostname);
-const host = params.get('host') === '1';
-const demo = !server && !local && params.get('live') !== '1' && !host && location.hostname !== 'golos.it9tech.ru';
+const demo = !server && !local && params.get('live') !== '1' && location.hostname !== 'golos.it9tech.ru';
 const botUrl = 'https://max.ru/se14925046_bot';
-let hostKey = '';
-let pendingPosition;
-let sendingPosition = false;
-let scrollTimer;
-let appliedScroll = -1;
-let projectedPosition;
-let animationFrame = 0;
-let scrollTarget;
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const bottom = {message_id: null, fraction: 0};
 
 function readPosition() {
@@ -34,88 +24,11 @@ function positionOffset(position) {
   return card ? Math.min(max, card.offsetTop + card.offsetHeight * position.fraction) : max;
 }
 
-function applyPosition(position, smooth = false) {
-  const target = positionOffset(position);
-  if (smooth && !reducedMotion.matches && target === scrollTarget && animationFrame) return;
-  cancelAnimationFrame(animationFrame);
-  animationFrame = 0;
-  scrollTarget = target;
-  const start = cloud.scrollTop;
-  if (!smooth || reducedMotion.matches || Math.abs(target - start) < 1) {
-    cloud.scrollTop = target;
-    appliedScroll = cloud.scrollTop;
-    return;
-  }
-  const startedAt = performance.now();
-  function step(now) {
-    const progress = Math.min(1, (now - startedAt) / 160);
-    cloud.scrollTop = start + (target - start) * progress;
-    animationFrame = progress < 1 ? requestAnimationFrame(step) : 0;
-  }
-  animationFrame = requestAnimationFrame(step);
+function applyPosition(position) {
+  cloud.scrollTop = positionOffset(position);
 }
 
-async function followPosition(endpoint) {
-  let delay = 110;
-  try {
-    const response = await fetch(endpoint, {cache: 'no-store', signal: AbortSignal.timeout(2500)});
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    projectedPosition = await response.json();
-    applyPosition(projectedPosition, true);
-  } catch {
-    delay = 800;
-  }
-  setTimeout(() => followPosition(endpoint), delay);
-}
-
-async function sendPosition(position) {
-  pendingPosition = position;
-  if (sendingPosition || !hostKey) return;
-  sendingPosition = true;
-  try {
-    while (pendingPosition) {
-      const next = pendingPosition;
-      pendingPosition = undefined;
-      const response = await fetch('/api/position', {
-        method: 'POST',
-        headers: {Authorization: 'Bearer ' + hostKey, 'Content-Type': 'application/json'},
-        body: JSON.stringify(next),
-        signal: AbortSignal.timeout(5000),
-      });
-      if (!response.ok) throw new Error(response.status === 401 ? 'Проверьте ключ ведущего' : 'Не удалось передать позицию');
-      byId('hostStatus').textContent = 'Экран следует за вашей прокруткой';
-    }
-  } catch (error) {
-    byId('hostStatus').textContent = error.message;
-  } finally {
-    sendingPosition = false;
-  }
-}
-
-byId('latest').onclick = () => {
-  applyPosition(bottom);
-  sendPosition(bottom);
-};
-if (host) {
-  byId('hostLogin').hidden = false;
-  document.body.classList.add('host');
-  byId('hostLogin').onsubmit = (event) => {
-    event.preventDefault();
-    hostKey = byId('hostKey').value;
-    byId('hostKey').value = '';
-    sendPosition(readPosition());
-  };
-  cloud.addEventListener('scroll', () => {
-    if (Math.abs(cloud.scrollTop - appliedScroll) < 1) return;
-    if (scrollTimer) return;
-    scrollTimer = setTimeout(() => {
-      scrollTimer = undefined;
-      if (Math.abs(cloud.scrollTop - appliedScroll) >= 1) sendPosition(readPosition());
-    }, 65);
-  });
-} else if (!demo && !server) {
-  byId('hostLink').hidden = false;
-}
+byId('latest').onclick = () => applyPosition(bottom);
 
 function showBot() {
   bot.href = botUrl;
@@ -137,18 +50,14 @@ function selectDisplay(mode, preservePosition = true) {
   } catch {}
 }
 
-if (host) {
-  byId('displayModes').hidden = true;
-} else {
-  let mode = 'chat';
-  try {
-    if (localStorage.getItem('golos-display') === 'qr') mode = 'qr';
-  } catch {}
-  selectDisplay(mode, false);
-  document.querySelectorAll('[data-display-mode]').forEach(button => {
-    button.addEventListener('click', () => selectDisplay(button.dataset.displayMode));
-  });
-}
+let mode = 'chat';
+try {
+  if (localStorage.getItem('golos-display') === 'qr') mode = 'qr';
+} catch {}
+selectDisplay(mode, false);
+document.querySelectorAll('[data-display-mode]').forEach(button => {
+  button.addEventListener('click', () => selectDisplay(button.dataset.displayMode));
+});
 
 function render(messages) {
   let changed = false;
@@ -214,8 +123,8 @@ async function refresh(endpoint) {
     const response = await fetch(endpoint, {cache: 'no-store', signal: AbortSignal.timeout(5000)});
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const data = await response.json();
-    const position = host ? readPosition() : projectedPosition === undefined ? data.position : projectedPosition;
-    if (render(data.messages)) applyPosition(position, !host);
+    const position = readPosition();
+    if (render(data.messages)) applyPosition(position);
     for (const reaction of data.reactions) {
       if (lastReaction !== null && reaction.id > lastReaction) animate(reaction.emoji);
     }
@@ -270,7 +179,6 @@ if (demo) {
     const endpoint = new URL('/api/screen', server || location.origin);
     if (endpoint.protocol !== 'https:' && !local) throw new Error('HTTPS required');
     refresh(endpoint);
-    if (!host) followPosition(new URL('/api/position', endpoint));
   } catch {
     status.textContent = 'Проверьте HTTPS-адрес сервера';
   }
