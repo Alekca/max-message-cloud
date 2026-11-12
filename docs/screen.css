@@ -32,7 +32,7 @@ button:hover, a:hover { background: #ffffff30; }
 .stage-view {
   color-scheme: light;
   color: #052b60;
-  background: linear-gradient(#ffffff55, #ffffff55), #d8eeff url("event-background.png") center / cover no-repeat fixed;
+  background: linear-gradient(#ffffffe6, #ffffffe6), #d8eeff url("event-background.png") center / cover no-repeat fixed;
 }
 .topbar, footer {
   display: flex;
