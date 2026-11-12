@@ -32,7 +32,7 @@ button:hover, a:hover { background: #ffffff30; }
 .stage-view {
   color-scheme: light;
   color: #052b60;
-  background: #d8eeff url("event-background.png") center / cover no-repeat fixed;
+  background: linear-gradient(#ffffff55, #ffffff55), #d8eeff url("event-background.png") center / cover no-repeat fixed;
 }
 .topbar, footer {
   display: flex;
@@ -88,7 +88,7 @@ button:hover, a:hover { background: #ffffff30; }
   padding: clamp(12px, 2vw, 26px);
   border: 1px solid #0066cd40;
   border-radius: 1.4rem;
-  background: #e5f4ffeb;
+  background: #fffffff5;
 }
 #qr {
   display: block;
@@ -104,24 +104,24 @@ button:hover, a:hover { background: #ffffff30; }
 .chat {
   min-width: 0;
   overflow: hidden;
-  color-scheme: dark;
-  color: #f5fbff;
-  border: clamp(5px, .6vw, 10px) solid #06346d;
+  color-scheme: light;
+  color: #15324d;
+  border: clamp(4px, .4vw, 7px) solid #2266b0;
   border-radius: clamp(24px, 3.6vw, 56px);
-  background: #08284f;
-  box-shadow: 0 0 0 3px #43aaff, 0 18px 46px #003b7538;
+  background: #f1f6fc;
+  box-shadow: 0 18px 46px #17497424;
 }
 .chat-header {
   display: flex;
   align-items: center;
   gap: .8rem;
   padding: clamp(12px, 1.5vw, 24px);
-  border-bottom: 1px solid #ffffff26;
-  background: #0a396b;
+  border-bottom: 1px solid #1b5d9b1c;
+  background: #fff;
 }
 .avatar { width: 2.55rem; height: 2.55rem; border-radius: 50%; font-size: .88rem; font-weight: 800; }
 .chat-header h2 { font-size: clamp(1.15rem, 2vw, 1.7rem); margin: 0; }
-.chat-header div > span { color: #c8e6ff; font-size: .87rem; }
+.chat-header div > span { color: #5d7289; font-size: .87rem; }
 #cloud {
   position: relative;
   overflow-y: auto;
@@ -129,9 +129,7 @@ button:hover, a:hover { background: #ffffff30; }
   overflow-anchor: none;
   height: clamp(230px, 58vh, 900px);
   padding: clamp(12px, 1.6vw, 24px);
-  background:
-    repeating-linear-gradient(135deg, #68beff0c 0 1px, transparent 1px 28px),
-    radial-gradient(ellipse at top right, #12477b, transparent 72%), #08284f;
+  background: #edf3f9;
 }
 #cloud:empty::before {
   position: absolute;
@@ -139,16 +137,16 @@ button:hover, a:hover { background: #ffffff30; }
   display: grid;
   place-items: center;
   padding: 1em;
-  color: #c8e6ff;
+  color: #5d7289;
   text-align: center;
   content: 'Первые сообщения появятся здесь';
 }
 #hint {
   margin: 0;
   padding: .75em 1.25em;
-  border-top: 1px solid #ffffff26;
-  color: #cce7ff;
-  background: #0a396b;
+  border-top: 1px solid #1b5d9b1c;
+  color: #5d7289;
+  background: #fff;
   font-size: .85rem;
 }
 .card {
@@ -185,12 +183,12 @@ button:hover, a:hover { background: #ffffff30; }
   max-width: 88%;
   padding: .52em .78em;
   border-radius: .85em .85em .85em .18em;
-  color: #f4faff;
-  background: #164b7d;
+  color: #18344e;
+  background: #fff;
+  box-shadow: 0 1px 3px #183b6214;
   overflow-wrap: anywhere;
 }
-.card:nth-child(even) .message-bubble { background: #1c588d; }
-.message-author { color: #9edaff; font-size: .76em; font-weight: 750; margin-bottom: .22em; }
+.message-author { color: #1562aa; font-size: .76em; font-weight: 750; margin-bottom: .22em; }
 .message-text { white-space: pre-wrap; }
 .stage-view button, .stage-view a { border-color: #0064c242; background: #ffffff99; }
 .stage-view button:hover, .stage-view a:hover { background: #d2edff; }
