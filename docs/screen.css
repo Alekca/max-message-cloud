@@ -220,3 +220,40 @@ button:hover, a:hover { background: #ffffff30; }
   .card { animation: none; }
   .reaction { bottom: 10%; animation: flash 2s linear both; }
 }
+
+#displayModes {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #0064c22b;
+  border-radius: .9em;
+  background: #ffffffc9;
+}
+#displayModes button { border: 0; background: transparent; font-size: .9rem; }
+#displayModes button[aria-pressed="true"] { background: #1562aa; color: #fff; }
+@media (min-width: 701px) {
+  .stage-view:not(.host)[data-display="chat"] .stage {
+    grid-template-columns: minmax(0, .7fr) minmax(0, 1.65fr);
+    gap: clamp(24px, 4vw, 64px);
+    width: min(100%, 1840px);
+    padding-block: 2vh;
+  }
+  .stage-view:not(.host)[data-display="chat"] #join h1 { font-size: clamp(2.2rem, 3.4vw, 4rem); }
+  .stage-view:not(.host)[data-display="chat"] .join-card { flex-direction: column; align-items: flex-start; }
+  .stage-view:not(.host)[data-display="chat"] #qr { width: min(100%, 230px); align-self: center; }
+  .stage-view:not(.host)[data-display="chat"] .join-card p { font-size: clamp(1rem, 1.3vw, 1.25rem); }
+  .stage-view:not(.host)[data-display="chat"] #cloud { height: clamp(230px, 60vh, 960px); }
+  .stage-view:not(.host)[data-display="chat"] .card { font-size: clamp(1.15rem, 1.9vw, 2.2rem); }
+  .stage-view:not(.host)[data-display="qr"] #join h1 { font-size: clamp(2.2rem, 3.4vw, 4rem); }
+  .stage-view:not(.host)[data-display="qr"] .join-card { flex-direction: column; text-align: center; }
+  .stage-view:not(.host)[data-display="qr"] #qr { width: min(100%, 350px, 37vh); }
+  .stage-view:not(.host)[data-display="qr"] .join-card p { font-size: clamp(1rem, 1.3vw, 1.25rem); }
+}
+@media (max-width: 700px) {
+  .topbar { flex-wrap: wrap; }
+  #displayModes { order: 3; width: 100%; }
+  #displayModes button { flex: 1; }
+  .stage-view[data-display="qr"] .join-card { flex-direction: column; text-align: center; }
+  .stage-view[data-display="qr"] #qr { width: min(100%, 300px); }
+  .stage-view:not(.host)[data-display="chat"] .card { font-size: 1.15rem; }
+}

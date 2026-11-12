@@ -125,6 +125,31 @@ function showBot() {
 const cards = new Map();
 let lastReaction = null;
 
+function selectDisplay(mode, preservePosition = true) {
+  const position = preservePosition ? readPosition() : null;
+  document.body.dataset.display = mode;
+  document.querySelectorAll('[data-display-mode]').forEach(button => {
+    button.setAttribute('aria-pressed', String(button.dataset.displayMode === mode));
+  });
+  if (preservePosition) applyPosition(position);
+  try {
+    localStorage.setItem('golos-display', mode);
+  } catch {}
+}
+
+if (host) {
+  byId('displayModes').hidden = true;
+} else {
+  let mode = 'chat';
+  try {
+    if (localStorage.getItem('golos-display') === 'qr') mode = 'qr';
+  } catch {}
+  selectDisplay(mode, false);
+  document.querySelectorAll('[data-display-mode]').forEach(button => {
+    button.addEventListener('click', () => selectDisplay(button.dataset.displayMode));
+  });
+}
+
 function render(messages) {
   let changed = false;
   const active = new Set(messages.map(({id}) => id));

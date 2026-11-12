@@ -6,9 +6,13 @@
   <title>Голос зала — чат мероприятия</title>
   <link rel="stylesheet" href="screen.css">
 </head>
-<body class="stage-view">
+<body class="stage-view" data-display="chat">
   <header class="topbar">
     <div class="brand"><span class="brand-mark" aria-hidden="true">···</span> Голос зала</div>
+    <div id="displayModes" role="group" aria-label="Режим отображения">
+      <button type="button" data-display-mode="chat" aria-pressed="true">Крупный чат</button>
+      <button type="button" data-display-mode="qr" aria-pressed="false">Крупный QR</button>
+    </div>
     <div id="status" role="status">Подключение…</div>
   </header>
   <main class="stage">
